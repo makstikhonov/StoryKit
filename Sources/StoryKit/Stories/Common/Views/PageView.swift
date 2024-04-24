@@ -25,7 +25,7 @@ struct PageView: View {
                     .embedInContainer()
                     .allowsHitTesting(false)
             case .video(let url):
-                VideoPlayer(player: avPlayer)
+                CustomVideoPlayer(player: avPlayer)
                     .onAppear {
                         avPlayer.replaceCurrentItem(with: .init(url: url))
                         if !isPaused {
