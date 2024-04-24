@@ -17,8 +17,9 @@ class StoriesViewModel: ObservableObject {
             updateStories()
         }
     }
-    let storiesViewModels: [StoryViewModel]
+    var storiesViewModels: [StoryViewModel]
     @Published var isDismissing: Bool = false
+    private var storyShowStartDate: Date?
 
     init(stories: [StoryKit.Story], initialIndex: Int) {
         self.stories = stories
@@ -29,8 +30,12 @@ class StoriesViewModel: ObservableObject {
             StoryViewModel.init(story: $1, isActive: $0 == initialIndex)
         }
         self.storiesViewModels.forEach {
-            $0.didEndView = didEndViewStory(_:)
-            $0.didRequestBack = didRequestBack
+            $0.didEndView = { [weak self] actionType in
+                self?.didEndViewStory(actionType)
+            }
+            $0.didRequestBack = { [weak self] actionType in
+                self?.didRequestBack(actionType)
+            }
         }
         // Prepare data for first and next stories
         self.storiesViewModels[currentStoryIndex].prepareData()
@@ -53,9 +58,24 @@ class StoriesViewModel: ObservableObject {
         showStory(at: index, byAction: .slide)
     }
 
-    func didDismiss(byAction actionType: StoryKit.ActionType) {
+    func didDismiss(byAction actionType: StoryKit.ActionType, direction: StoryKit.Direction?) {
         isDismissing = true
-        StoryKit.configuration?.actions.storyDidClose(stories[currentStoryIndex], actionType)
+        StoryKit.configuration?.actions.storyDidClose(
+            stories[currentStoryIndex],
+            storiesViewModels[currentStoryIndex].story.pages[storiesViewModels[currentStoryIndex].currentPageIndex],
+            actionType,
+            direction,
+            Date().timeIntervalSince(storyShowStartDate ?? Date())
+        )
+        storiesViewModels.forEach { $0.destroyTimer() }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//            self.storiesViewModels.removeAll()
+//        }
+    }
+
+    // MARK: - Lifecycle -
+    func viewDidAppear() {
+        storyShowStartDate = Date()
     }
 }
 
@@ -63,29 +83,42 @@ class StoriesViewModel: ObservableObject {
 extension StoriesViewModel {
 
     func showStory(at index: Int, byAction actionType: StoryKit.ActionType) {
+        defer {
+            storyShowStartDate = Date()
+        }
         let isNext = currentStoryIndex < index
         switch isNext {
         case true:
             if stories.count - 1 >= index {
-                StoryKit.configuration?.actions.storyDidMoveToStoryWithAction(
+                // Page in new story
+                let page = storiesViewModels[index].story.pages[storiesViewModels[index].currentPageIndex]
+                StoryKit.configuration?.actions.storyDidMoveFromPageToStoryWithAction(
                     stories[currentStoryIndex],
+                    page,
                     stories[index],
-                    .slide
+                    .forward,
+                    .slide,
+                    Date().timeIntervalSince(storyShowStartDate ?? Date())
                 )
                 currentStoryIndex = index
             } else {
-                didDismiss(byAction: actionType)
+                didDismiss(byAction: actionType, direction: .forward)
             }
         case false:
             if index >= 0 {
-                StoryKit.configuration?.actions.storyDidMoveToStoryWithAction(
+                // Page in new story
+                let page = storiesViewModels[index].story.pages[storiesViewModels[index].currentPageIndex]
+                StoryKit.configuration?.actions.storyDidMoveFromPageToStoryWithAction(
                     stories[currentStoryIndex],
+                    page,
                     stories[index],
-                    .slide
+                    .back,
+                    .slide,
+                    Date().timeIntervalSince(storyShowStartDate ?? Date())
                 )
                 currentStoryIndex = index
             } else {
-                didDismiss(byAction: actionType)
+                didDismiss(byAction: actionType, direction: .back)
             }
         }
     }

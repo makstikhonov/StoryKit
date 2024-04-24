@@ -21,8 +21,6 @@ class StoryViewModel: ObservableObject {
     var didEndView: ((_ actionType: StoryKit.ActionType) -> Void)?
     var didRequestBack: ((_ actionType: StoryKit.ActionType) -> Void)?
 
-    private var timer: CADisplayLink?
-
     @Published var currentPageIndex: Int = 0 {
         didSet {
             updateTimerStatus()
@@ -30,6 +28,9 @@ class StoryViewModel: ObservableObject {
     }
     @Published var storyProgressSeconds: Double = 0
 
+    private var storyShowStartDate: Date?
+    private var pageShowStartDate: Date?
+    private var timer: CADisplayLink?
     private var isHolded: Bool = false
     private var holdStartDate: Date?
 
@@ -96,17 +97,31 @@ class StoryViewModel: ObservableObject {
         storyProgressSeconds = story.pages[0..<pageIndex].reduce(0) { $0 + $1.duration }
     }
 
+    func destroyTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
     func didDismiss() {
-        StoryKit.configuration?.actions.storyDidClose(story, .press)
+        StoryKit.configuration?.actions.storyDidClose(
+            story,
+            story.pages[currentPageIndex],
+            .button,
+            nil,
+            Date().timeIntervalSince(storyShowStartDate ?? Date())
+        )
+        destroyTimer()
     }
 
     // MARK: - Lifecycle -
     func viewDidAppear() {
-        StoryKit.configuration?.actions.storyDidShow(story)
+        storyShowStartDate = Date()
+        StoryKit.configuration?.actions.storyDidShow(story, story.pages[currentPageIndex])
         prepareData()
     }
 
     func pageContentDidAppear() {
+        pageShowStartDate = Date()
         updateTimerStatus()
     }
 }
@@ -122,6 +137,11 @@ private extension StoryViewModel {
                 self?.pagesData[index] = .failed(NSError())
                 return
             }
+            let buttonSelectionAction = { [weak self] in
+                guard let self, let link = page.buttonData?.link else { return }
+                StoryKit.configuration?.actions.storyPageDidSelectActionButton(story, page)
+                UIApplication.shared.open(link)
+            }
             switch page.contentType {
             case .image(let url):
                 if let data = try? Data(contentsOf: localURL), let image = UIImage(data: data) {
@@ -129,7 +149,8 @@ private extension StoryViewModel {
                         id: page.id,
                         duration: page.duration,
                         contentType: .image(image),
-                        buttonData: page.buttonData
+                        buttonData: page.buttonData,
+                        buttonSelectionAction: buttonSelectionAction
                     ))
                 } else {
                     self?.pagesData[index] = .failed(NSError())
@@ -139,7 +160,8 @@ private extension StoryViewModel {
                     id: page.id,
                     duration: page.duration,
                     contentType: .video(url: localURL),
-                    buttonData: page.buttonData
+                    buttonData: page.buttonData,
+                    buttonSelectionAction: buttonSelectionAction
                 ))
             }
         }
@@ -147,19 +169,35 @@ private extension StoryViewModel {
 
     func showNextPage() {
         if story.pages.count - 1 > currentPageIndex {
+            StoryKit.configuration?.actions.storyDidMoveToPageWithAction(
+                story,
+                story.pages[currentPageIndex + 1],
+                .forward,
+                .click,
+                Date().timeIntervalSince(pageShowStartDate ?? Date())
+            )
             moveProgress(toPage: currentPageIndex + 1)
             currentPageIndex += 1
+            pageShowStartDate = Date()
         } else {
-            didEndView?(.press)
+            didEndView?(.click)
         }
     }
 
     func showPreviousPage() {
         if currentPageIndex > 0 {
+            StoryKit.configuration?.actions.storyDidMoveToPageWithAction(
+                story,
+                story.pages[currentPageIndex - 1],
+                .back,
+                .click,
+                Date().timeIntervalSince(pageShowStartDate ?? Date())
+            )
             moveProgress(toPage: currentPageIndex - 1)
             currentPageIndex -= 1
+            pageShowStartDate = Date()
         } else {
-            didRequestBack?(.press)
+            didRequestBack?(.click)
         }
     }
 
@@ -210,12 +248,21 @@ private extension StoryViewModel {
         if newPageIndex == currentPageIndex + 2 && story.pages[newPageIndex - 1].duration == 0 {
             newPageIndex -= 1
         }
+        StoryKit.configuration?.actions.storyDidMoveToPageWithAction(
+            story,
+            story.pages[newPageIndex],
+            .forward,
+            .auto,
+            Date().timeIntervalSince(pageShowStartDate ?? Date())
+        )
         // this and .main.async needs to stop playing video on current(previous currenly) page
         timer?.isPaused = true
         isPagePaused = true
-        DispatchQueue.main.async {
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.moveProgress(toPage: newPageIndex)
             self.currentPageIndex = Int(newPageIndex)
+            self.pageShowStartDate = Date()
         }
     }
 }

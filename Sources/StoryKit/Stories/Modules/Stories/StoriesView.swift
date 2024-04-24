@@ -37,6 +37,7 @@ struct StoriesView: View {
                 .ignoresSafeArea()
                 .onAppear {
                     viewSize = geo.size
+                    viewModel.viewDidAppear()
                 }
         }
         .statusBarHidden(false)
@@ -49,7 +50,7 @@ struct StoriesView: View {
                 }
                 .onEnded { value in
                     if value.translation.height > 100 {
-                        viewModel.didDismiss(byAction: .slide)
+                        viewModel.didDismiss(byAction: .slide, direction: .down)
                     }
                 }
         )
@@ -131,7 +132,7 @@ struct StoriesView: View {
                     offset.x <= -10 ||
                     offset.x >= scrollView.contentSize.width - scrollView.frame.width + 10
                 else { return }
-                viewModel.didDismiss(byAction: .slide)
+                viewModel.didDismiss(byAction: .slide, direction: offset.x <= -10 ? .back : .forward)
             },
             onDraggingBegin: { offset in
                 viewModel.didStartSlideStories()

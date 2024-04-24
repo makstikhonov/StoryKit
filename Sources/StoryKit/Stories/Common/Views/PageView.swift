@@ -53,12 +53,9 @@ struct PageView: View {
                             avPlayer.play()
                         }
                     }
-
             }
             if let buttonData = pageData.buttonData {
-                Button {
-                    UIApplication.shared.open(buttonData.link)
-                } label: {
+                Button(action: pageData.buttonSelectionAction) {
                     Text(buttonData.title)
                         .font(.system(size: 17, weight: .medium))
                         .frame(maxWidth: .infinity)
@@ -88,6 +85,7 @@ extension PageView {
         let duration: Double
         let contentType: ContentType
         let buttonData: StoryKit.Story.PageData.ButtonData?
+        let buttonSelectionAction: () -> Void
     }
 }
 
@@ -104,7 +102,8 @@ extension PageView {
                 backgroundColor: .yellow,
                 title: "Button name",
                 link: .init(string: "https://apple.com")!
-            )
+            ),
+            buttonSelectionAction: {}
         ),
         isPaused: .constant(false)
     )

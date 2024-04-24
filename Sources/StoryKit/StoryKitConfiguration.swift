@@ -11,8 +11,15 @@ public extension StoryKit {
 
     enum ActionType {
         case slide
-        case press
+        case click
+        case button
         case auto
+    }
+
+    enum Direction {
+        case forward
+        case back
+        case down
     }
 }
 
@@ -33,43 +40,68 @@ public extension StoryKit.Configuration {
 
     struct Actions {
 
-        public var storyDidShow: (_ story: StoryKit.Story) -> Void
+        public var storyDidShow: (_ story: StoryKit.Story, _ page: StoryKit.Story.PageData) -> Void
         public var storyDidMoveToPageWithAction: (
             _ story: StoryKit.Story,
-            _ page: StoryKit.Story.PageData,
-            _ actionType: StoryKit.ActionType
+            _ newPage: StoryKit.Story.PageData,
+            _ direction: StoryKit.Direction,
+            _ actionType: StoryKit.ActionType,
+            _ showDuration: TimeInterval
         ) -> Void
-        public var storyDidMoveToStoryWithAction: (
+        public var storyDidMoveFromPageToStoryWithAction: (
             _ story: StoryKit.Story,
+            _ page: StoryKit.Story.PageData,
             _ newStory: StoryKit.Story,
-            _ actionType: StoryKit.ActionType
+            _ direction: StoryKit.Direction,
+            _ actionType: StoryKit.ActionType,
+            _ showDuration: TimeInterval
         ) -> Void
         public var storyDidClose: (
             _ story: StoryKit.Story,
-            _ actionType: StoryKit.ActionType
+            _ page: StoryKit.Story.PageData,
+            _ actionType: StoryKit.ActionType,
+            _ direction: StoryKit.Direction?,
+            _ showDuration: TimeInterval
+        ) -> Void
+        public var storyPageDidSelectActionButton: (
+            _ story: StoryKit.Story,
+            _ page: StoryKit.Story.PageData
         ) -> Void
 
         public init(
-            storyDidShow: @escaping(_ story: StoryKit.Story) -> Void,
+            storyDidShow: @escaping(_ story: StoryKit.Story, _ page: StoryKit.Story.PageData) -> Void,
             storyDidMoveToPageWithAction: @escaping (
                 _ story: StoryKit.Story,
-                _ page: StoryKit.Story.PageData,
-                _ actionType: StoryKit.ActionType
+                _ newPage: StoryKit.Story.PageData,
+                _ direction: StoryKit.Direction,
+                _ actionType: StoryKit.ActionType,
+                _ showDuration: TimeInterval
             ) -> Void,
-            storyDidMoveToStoryWithAction: @escaping (
+            storyDidMoveFromPageToStoryWithAction: @escaping (
                 _ story: StoryKit.Story,
+                _ page: StoryKit.Story.PageData,
                 _ newStory: StoryKit.Story,
-                _ actionType: StoryKit.ActionType
+                _ direction: StoryKit.Direction,
+                _ actionType: StoryKit.ActionType,
+                _ showDuration: TimeInterval
             ) -> Void,
             storyDidClose: @escaping (
                 _ story: StoryKit.Story,
-                _ actionType: StoryKit.ActionType
+                _ page: StoryKit.Story.PageData,
+                _ actionType: StoryKit.ActionType,
+                _ direction: StoryKit.Direction?,
+                _ showDuration: TimeInterval
+            ) -> Void,
+            storyPageDidSelectActionButton: @escaping (
+                _ story: StoryKit.Story,
+                _ page: StoryKit.Story.PageData
             ) -> Void
         ) {
             self.storyDidShow = storyDidShow
             self.storyDidMoveToPageWithAction = storyDidMoveToPageWithAction
-            self.storyDidMoveToStoryWithAction = storyDidMoveToStoryWithAction
+            self.storyDidMoveFromPageToStoryWithAction = storyDidMoveFromPageToStoryWithAction
             self.storyDidClose = storyDidClose
+            self.storyPageDidSelectActionButton = storyPageDidSelectActionButton
         }
     }
 }

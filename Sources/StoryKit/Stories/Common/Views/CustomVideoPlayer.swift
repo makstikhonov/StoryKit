@@ -20,6 +20,6 @@ struct CustomVideoPlayer : UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-
+        uiViewController.player = player
     }
 }
