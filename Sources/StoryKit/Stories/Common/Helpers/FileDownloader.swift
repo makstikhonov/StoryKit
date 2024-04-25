@@ -36,6 +36,12 @@ class FilesDownloader {
         }
         let task = session.downloadTask(with: request) { tempURL, response, error in
             // Store data in cache
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 200
+            guard error == nil && statusCode >= 200 && statusCode < 400 else {
+                // Error state
+                completion(nil, response?.suggestedFilename, error ?? NSError())
+                return
+            }
             if
                 let tempURL,
                 let response = response,
