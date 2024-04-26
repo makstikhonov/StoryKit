@@ -43,14 +43,21 @@ struct StoriesView: View {
         .statusBarHidden(false)
         .simultaneousGesture(
             DragGesture(minimumDistance: 25)
+                .onChanged { value in
+                    // enable only swipe to bottom when start dragging
+                    guard value.translation.height >= 0 || viewModel.isDragging else { return }
+                    viewModel.didChangeDragLocation()
+                }
                 .updating($dragTranslation) { value, state, transaction in
-                    // enable only swipe to bottom
-                    guard value.translation.height >= 25 else { return}
+                    // enable only swipe to bottom when start dragging
+                    guard value.translation.height >= 0 || viewModel.isDragging else { return}
                     state = value.translation
                 }
                 .onEnded { value in
                     if value.translation.height > 100 {
                         viewModel.didDismiss(byAction: .slide, direction: .down)
+                    } else {
+                        viewModel.didCancelDismiss()
                     }
                 }
         )

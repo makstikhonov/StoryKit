@@ -18,6 +18,7 @@ class StoriesViewModel: ObservableObject {
         }
     }
     var storiesViewModels: [StoryViewModel]
+    var isDragging: Bool = false
     @Published var isDismissing: Bool = false
     private var storyShowStartDate: Date?
 
@@ -58,6 +59,17 @@ class StoriesViewModel: ObservableObject {
         showStory(at: index, byAction: .slide)
     }
 
+    func didChangeDragLocation() {
+        guard !isDragging else { return }
+        isDragging = true
+        storiesViewModels.forEach { $0.isActive = false }
+    }
+
+    func didCancelDismiss() {
+        isDragging = false
+        storiesViewModels.enumerated().forEach { $0.element.isActive = $0.offset == currentStoryIndex }
+    }
+
     func didDismiss(byAction actionType: StoryKit.ActionType, direction: StoryKit.Direction?) {
         isDismissing = true
         StoryKit.configuration?.actions.storyDidClose(
@@ -68,9 +80,6 @@ class StoriesViewModel: ObservableObject {
             Date().timeIntervalSince(storyShowStartDate ?? Date())
         )
         storiesViewModels.forEach { $0.destroyTimer() }
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-//            self.storiesViewModels.removeAll()
-//        }
     }
 
     // MARK: - Lifecycle -
