@@ -65,6 +65,7 @@ struct StoryView: View {
             .frame(maxWidth: .infinity)
         case .loaded(let data):
             PageView(pageData: data, isPaused: $viewModel.isPagePaused)
+                .id(data.id)
                 .onAppear {
                     viewModel.pageContentDidAppear()
                 }

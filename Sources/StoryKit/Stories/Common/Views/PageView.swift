@@ -32,10 +32,6 @@ struct PageView: View {
                             avPlayer.play()
                         }
                     }
-//                    .onDisappear {
-//                        isPaused = true
-//                        avPlayer.pause()
-//                    }
                     .allowsHitTesting(false)
                     .onChange(of: isPaused) { newValue in
                         newValue ? avPlayer.pause() : avPlayer.play()
