@@ -33,6 +33,7 @@ class StoryViewModel: ObservableObject {
     private var timer: CADisplayLink?
     private var isHolded: Bool = false
     private var holdStartDate: Date?
+    private var isOnTheScreen: Bool = false
 
     @Published var isPagePaused: Bool = false
 
@@ -115,9 +116,16 @@ class StoryViewModel: ObservableObject {
 
     // MARK: - Lifecycle -
     func viewDidAppear() {
+        isOnTheScreen = true
         storyShowStartDate = Date()
         StoryKit.configuration?.actions.storyDidShow(story, story.pages[currentPageIndex])
         prepareData()
+        updateTimerStatus()
+    }
+
+    func viewDidDisappear() {
+        isOnTheScreen = false
+        updateTimerStatus()
     }
 
     func pageContentDidAppear() {
@@ -203,7 +211,13 @@ private extension StoryViewModel {
 
     // MARK: - Timer
     func updateTimerStatus() {
-        if let pagesData = pagesData[currentPageIndex].value, pagesData.duration != 0 && isActive && !isHolded {
+        if 
+            let pagesData = pagesData[currentPageIndex].value,
+            pagesData.duration != 0 &&
+            isActive &&
+            !isHolded &&
+            isOnTheScreen
+        {
             resumeTimer()
         } else {
             pauseTimer()

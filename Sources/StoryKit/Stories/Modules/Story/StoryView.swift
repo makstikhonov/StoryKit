@@ -47,6 +47,9 @@ struct StoryView: View {
             .onAppear {
                 viewModel.viewDidAppear()
             }
+            .onDisappear {
+                viewModel.viewDidDisappear()
+            }
     }
 
     @ViewBuilder
