@@ -85,6 +85,11 @@ class StoriesViewModel: ObservableObject {
     // MARK: - Lifecycle -
     func viewDidAppear() {
         storyShowStartDate = Date()
+        let currentStoryViewModel = storiesViewModels[currentStoryIndex]
+        StoryKit.configuration?.actions.storyDidShow(
+            currentStoryViewModel.story,
+            currentStoryViewModel.story.pages[currentStoryViewModel.currentPageIndex]
+        )
     }
 }
 
@@ -106,8 +111,13 @@ extension StoriesViewModel {
                     page,
                     stories[index],
                     .forward,
-                    .slide,
+                    actionType,
                     Date().timeIntervalSince(storyShowStartDate ?? Date())
+                )
+                let currentStoryViewModel = storiesViewModels[currentStoryIndex]
+                StoryKit.configuration?.actions.storyDidShow(
+                    storiesViewModels[index].story,
+                    currentStoryViewModel.story.pages[currentStoryViewModel.currentPageIndex]
                 )
                 currentStoryIndex = index
             } else {
@@ -122,8 +132,13 @@ extension StoriesViewModel {
                     page,
                     stories[index],
                     .back,
-                    .slide,
+                    actionType,
                     Date().timeIntervalSince(storyShowStartDate ?? Date())
+                )
+                let currentStoryViewModel = storiesViewModels[currentStoryIndex]
+                StoryKit.configuration?.actions.storyDidShow(
+                    storiesViewModels[index].story,
+                    currentStoryViewModel.story.pages[currentStoryViewModel.currentPageIndex]
                 )
                 currentStoryIndex = index
             } else {

@@ -118,7 +118,6 @@ class StoryViewModel: ObservableObject {
     func viewDidAppear() {
         isOnTheScreen = true
         storyShowStartDate = Date()
-        StoryKit.configuration?.actions.storyDidShow(story, story.pages[currentPageIndex])
         prepareData()
         updateTimerStatus()
     }
