@@ -74,11 +74,13 @@ class StoryViewModel: ObservableObject {
     }
 
     func didSelectNextPage() {
+        guard isActive else { return }
         guard let holdStartDate, Date().timeIntervalSince(holdStartDate) < 0.2 else { return }
         showNextPage()
     }
 
     func didSelectPreviousPage() {
+        guard isActive else { return }
         guard let holdStartDate, Date().timeIntervalSince(holdStartDate) < 0.2  else { return }
         showPreviousPage()
     }

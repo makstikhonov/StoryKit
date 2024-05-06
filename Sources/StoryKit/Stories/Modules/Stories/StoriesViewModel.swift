@@ -20,6 +20,7 @@ class StoriesViewModel: ObservableObject {
     var storiesViewModels: [StoryViewModel]
     var isDragging: Bool = false
     @Published var isDismissing: Bool = false
+    @Published var isAutoScrolling: Bool = false
     private var storyShowStartDate: Date?
 
     init(stories: [StoryKit.Story], initialIndex: Int) {
@@ -119,6 +120,9 @@ extension StoriesViewModel {
                     storiesViewModels[index].story,
                     currentStoryViewModel.story.pages[currentStoryViewModel.currentPageIndex]
                 )
+                if actionType == .click || actionType == .auto && index != currentStoryIndex {
+                    disableScrollForAWhile()
+                }
                 currentStoryIndex = index
             } else {
                 didDismiss(byAction: actionType, direction: .forward)
@@ -140,6 +144,9 @@ extension StoriesViewModel {
                     storiesViewModels[index].story,
                     currentStoryViewModel.story.pages[currentStoryViewModel.currentPageIndex]
                 )
+                if actionType == .click || actionType == .auto && index != currentStoryIndex {
+                    disableScrollForAWhile()
+                }
                 currentStoryIndex = index
             } else {
                 didDismiss(byAction: actionType, direction: .back)
@@ -159,6 +166,13 @@ extension StoriesViewModel {
         }
         if currentStoryIndex + 1 < storiesViewModels.count {
             storiesViewModels[currentStoryIndex + 1].prepareData()
+        }
+    }
+
+    func disableScrollForAWhile() {
+        isAutoScrolling = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            self.isAutoScrolling = false
         }
     }
 }

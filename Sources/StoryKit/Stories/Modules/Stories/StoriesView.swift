@@ -35,6 +35,7 @@ struct StoriesView: View {
                     anchor: .center
                 )
                 .ignoresSafeArea()
+                .allowsHitTesting(!viewModel.isAutoScrolling)
                 .onAppear {
                     viewSize = geo.size
                     viewModel.viewDidAppear()
@@ -112,6 +113,7 @@ struct StoriesView: View {
                 .animation(.none)
                 .background(scrollDetector(geo: geo))
             }
+            .pagingEnable()
             .onChange(of: viewModel.currentStoryIndex) { newValue in
                 withAnimation {
                     scrollReader.scrollTo(newValue)
@@ -151,8 +153,3 @@ struct StoriesView: View {
         )
     }
 }
-
-//#Preview {
-//    @Namespace var animation
-//    StoriesView(stories: [], storiesNamespace: animation)
-//}
