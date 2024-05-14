@@ -5,7 +5,7 @@
 //  Created by Sakhabaev Egor on 21.04.2024.
 //
 
-import Foundation
+import SwiftUI
 
 public extension StoryKit {
 
@@ -28,15 +28,34 @@ public extension StoryKit {
 
     struct Configuration {
 
+        public let failureState: FailureState?
         public let actions: Actions
 
-        public init(actions: Actions) {
+        public init(failureState: FailureState? = nil, actions: Actions) {
+            self.failureState = failureState
             self.actions = actions
         }
     }
 }
 
 public extension StoryKit.Configuration {
+
+    struct FailureState {
+
+        let countToAppear: Int
+        let viewForError: (_ error: Error, _ updateAction: @escaping () -> Void) -> AnyView
+
+        public init(
+            countToAppear: Int,
+            viewForError: @escaping (
+                _ error: Error,
+                _ updateAction: @escaping () -> Void
+            ) -> AnyView
+        ) {
+            self.countToAppear = countToAppear
+            self.viewForError = viewForError
+        }
+    }
 
     struct Actions {
 

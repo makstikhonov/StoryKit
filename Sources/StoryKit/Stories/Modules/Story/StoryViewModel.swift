@@ -37,6 +37,8 @@ class StoryViewModel: ObservableObject {
 
     @Published var isPagePaused: Bool = false
 
+    private var errorsCountInARow: Int = 0
+
     init(
         story: StoryKit.Story,
         isActive: Bool,
@@ -116,6 +118,17 @@ class StoryViewModel: ObservableObject {
         destroyTimer()
     }
 
+    func failureView(forError error: Error) -> AnyView? {
+        errorsCountInARow += 1
+        guard
+            let failureState = StoryKit.configuration?.failureState,
+            errorsCountInARow >= failureState.countToAppear
+        else { return nil }
+        return StoryKit.configuration?.failureState?.viewForError(error) { [weak self] in
+            self?.reloadPage()
+        }
+    }
+
     // MARK: - Lifecycle -
     func viewDidAppear() {
         isOnTheScreen = true
@@ -143,7 +156,7 @@ private extension StoryViewModel {
         pagesData[index] = .loading
         StoryKit.pageData(page) { [weak self] localURL, error in
             guard let localURL else {
-                self?.pagesData[index] = .failed(NSError())
+                self?.pagesData[index] = .failed(NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 return
             }
             let buttonSelectionAction = { [weak self] in
@@ -162,7 +175,7 @@ private extension StoryViewModel {
                         buttonSelectionAction: buttonSelectionAction
                     ))
                 } else {
-                    self?.pagesData[index] = .failed(NSError())
+                    self?.pagesData[index] = .failed(NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 }
             case .video(let url):
                 self?.pagesData[index] = .loaded(.init(

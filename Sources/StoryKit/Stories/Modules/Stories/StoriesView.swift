@@ -27,7 +27,7 @@ struct StoriesView: View {
     var body: some View {
         GeometryReader { geo in
             storyView(geo: geo)
-                .background(dragTranslation == .zero ? Color.black : .clear)
+                .background(dragTranslation == .zero ? Color.init(hex: "1A1A1A") : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: dragTranslation == .zero ? 0 : 12))
                 .offset(x: dragTranslation.width, y: dragTranslation.height)
                 .scaleEffect(

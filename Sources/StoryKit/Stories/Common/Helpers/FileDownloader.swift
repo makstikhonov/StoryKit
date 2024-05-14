@@ -39,7 +39,7 @@ class FilesDownloader {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 200
             guard error == nil && statusCode >= 200 && statusCode < 400 else {
                 // Error state
-                completion(nil, response?.suggestedFilename, error ?? NSError())
+                completion(nil, response?.suggestedFilename, error ?? NSError(domain: "com.storykit", code: statusCode))
                 return
             }
             if

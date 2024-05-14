@@ -43,7 +43,7 @@ struct StoryView: View {
                 alignment: .topTrailing
             )
             .background(controls())
-            .background(Color.black)
+            .background(Color(hex: "1A1A1A"))
             .onAppear {
                 viewModel.viewDidAppear()
             }
@@ -69,17 +69,21 @@ struct StoryView: View {
                 .onAppear {
                     viewModel.pageContentDidAppear()
                 }
-        case .failed:
-            VStack {
-                Spacer()
-                Button {
-                    viewModel.reloadPage()
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 41))
-                        .foregroundColor(.white)
+        case .failed(let error):
+            if let view = viewModel.failureView(forError: error) {
+                view
+            } else {
+                VStack {
+                    Spacer()
+                    Button {
+                        viewModel.reloadPage()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 41))
+                            .foregroundColor(.white)
+                    }
+                    Spacer()
                 }
-                Spacer()
             }
         }
     }

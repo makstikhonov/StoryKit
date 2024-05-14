@@ -6,7 +6,11 @@ public struct StoryKit {
     static let fileDownloader = FilesDownloader()
     static var configuration: Configuration?
 
-    public static func storiesView(_ stories: [Story], initialIndex: Int, withConfiguration configuration: Configuration) -> some View {
+    public static func storiesView(
+        _ stories: [Story],
+        initialIndex: Int,
+        withConfiguration configuration: Configuration? = nil
+    ) -> some View {
         self.configuration = configuration
         return StoriesView(stories: stories, initialIndex: initialIndex)
     }
