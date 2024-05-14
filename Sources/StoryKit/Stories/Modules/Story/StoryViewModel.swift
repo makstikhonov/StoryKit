@@ -156,7 +156,7 @@ private extension StoryViewModel {
         pagesData[index] = .loading
         StoryKit.pageData(page) { [weak self] localURL, error in
             guard let localURL else {
-                self?.pagesData[index] = .failed(NSError(domain: "com.storykit", code: 404, userInfo: nil))
+                self?.pagesData[index] = .failed(error ?? NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 return
             }
             let buttonSelectionAction = { [weak self] in
@@ -175,7 +175,7 @@ private extension StoryViewModel {
                         buttonSelectionAction: buttonSelectionAction
                     ))
                 } else {
-                    self?.pagesData[index] = .failed(NSError(domain: "com.storykit", code: 404, userInfo: nil))
+                    self?.pagesData[index] = .failed(error ?? NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 }
             case .video(let url):
                 self?.pagesData[index] = .loaded(.init(
