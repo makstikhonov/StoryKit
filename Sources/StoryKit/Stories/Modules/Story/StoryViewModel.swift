@@ -119,7 +119,6 @@ class StoryViewModel: ObservableObject {
     }
 
     func failureView(forError error: Error) -> AnyView? {
-        errorsCountInARow += 1
         guard
             let failureState = StoryKit.configuration?.failureState,
             errorsCountInARow >= failureState.countToAppear
@@ -156,6 +155,7 @@ private extension StoryViewModel {
         pagesData[index] = .loading
         StoryKit.pageData(page) { [weak self] localURL, error in
             guard let localURL else {
+                self?.errorsCountInARow += 1
                 self?.pagesData[index] = .failed(error ?? NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 return
             }
@@ -175,6 +175,7 @@ private extension StoryViewModel {
                         buttonSelectionAction: buttonSelectionAction
                     ))
                 } else {
+                    self?.errorsCountInARow += 1
                     self?.pagesData[index] = .failed(error ?? NSError(domain: "com.storykit", code: 404, userInfo: nil))
                 }
             case .video(let url):
