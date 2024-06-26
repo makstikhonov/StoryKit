@@ -53,15 +53,15 @@ struct PageView: View {
             if let buttonData = pageData.buttonData {
                 Button(action: pageData.buttonSelectionAction) {
                     Text(buttonData.title)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(buttonData.font)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 54)
+                        .frame(height: buttonData.height)
                         .background(buttonData.backgroundColor)
                         .foregroundColor(buttonData.titleColor)
                         .tintColor(buttonData.titleColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
+                        .clipShape(RoundedRectangle(cornerRadius: buttonData.cornerRadius))
+                        .padding(.horizontal, buttonData.horizontalPadding)
+                        .padding(.bottom, buttonData.bottomPadding)
                 }
             }
         }

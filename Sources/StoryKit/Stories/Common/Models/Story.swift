@@ -36,12 +36,32 @@ public extension StoryKit.Story {
             let backgroundColor: Color
             let title: String
             let link: URL
+            let font: Font
+            let height: CGFloat
+            let cornerRadius: CGFloat
+            let horizontalPadding: CGFloat
+            let bottomPadding: CGFloat
 
-            public init(titleColor: Color, backgroundColor: Color, title: String, link: URL) {
+            public init(
+                titleColor: Color,
+                backgroundColor: Color,
+                title: String,
+                link: URL,
+                font: Font = .system(size: 17.0, weight: .medium),
+                height: CGFloat = 54,
+                cornerRadius: CGFloat = 18,
+                horizontalPadding: CGFloat = 24,
+                bottomPadding: CGFloat = 50
+            ) {
                 self.titleColor = titleColor
                 self.backgroundColor = backgroundColor
                 self.title = title
                 self.link = link
+                self.font = font
+                self.height = height
+                self.cornerRadius = cornerRadius
+                self.horizontalPadding = horizontalPadding
+                self.bottomPadding = bottomPadding
             }
         }
 
