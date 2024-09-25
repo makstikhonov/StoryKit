@@ -39,6 +39,7 @@ class StoriesViewModel: ObservableObject {
                 self?.didRequestBack(actionType)
             }
         }
+        guard !stories.isEmpty else { return }
         // Prepare data for first and next stories
         self.storiesViewModels[currentStoryIndex].prepareData()
         updateStories()
