@@ -104,9 +104,6 @@ struct StoryView: View {
         HStack(spacing: 0) {
             Rectangle()
                 .contentShape(Rectangle())
-                .onLongPressGesture(minimumDuration: .infinity, perform: {}) { bool in
-                    viewModel.didHold(ended: !bool, leftSide: true)
-                }
                 .highPriorityGesture(
                     TapGesture()
                         .onEnded {
@@ -115,15 +112,15 @@ struct StoryView: View {
                 )
             Rectangle()
                 .contentShape(Rectangle())
-                .onLongPressGesture(minimumDuration: .infinity, perform: { }) { bool in
-                    viewModel.didHold(ended: !bool, leftSide: false)
-                }
                 .highPriorityGesture(
                     TapGesture()
                         .onEnded {
                             viewModel.didSelectNextPage()
                         }
                 )
+        }
+        .onLongPressGesture(minimumDuration: .infinity, perform: { }) { bool in
+            viewModel.didHold(ended: !bool)
         }
         .foregroundColor(.clear)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

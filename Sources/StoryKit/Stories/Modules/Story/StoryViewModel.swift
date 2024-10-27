@@ -87,7 +87,7 @@ class StoryViewModel: ObservableObject {
         showPreviousPage()
     }
 
-    func didHold(ended: Bool, leftSide: Bool) {
+    func didHold(ended: Bool) {
         if ended {
             isHolded = false
             updateTimerStatus()

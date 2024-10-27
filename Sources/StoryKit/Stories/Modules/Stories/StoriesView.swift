@@ -28,8 +28,8 @@ struct StoriesView: View {
         GeometryReader { geo in
             storyView(geo: geo)
                 .background(viewModel.isDragging ? .clear : Color.init(hex: "1A1A1A"))
-                .clipShape(RoundedRectangle(cornerRadius: dragTranslation == .zero ? 0 : 12))
-                .offset(x: dragTranslation.width, y: dragTranslation.height)
+                .clipShape(RoundedRectangle(cornerRadius: viewModel.isDragging ? 12 : 0))
+                .projectionOffset(dragTranslation)
                 .scaleEffect(
                     CGSize(width: scale, height: scale),
                     anchor: .center
@@ -42,7 +42,7 @@ struct StoriesView: View {
                 }
         }
         .statusBarHidden(false)
-        .simultaneousGesture(
+        .gesture(
             DragGesture(minimumDistance: 25)
                 .onChanged { value in
                     // enable only swipe to bottom when start dragging
@@ -51,7 +51,7 @@ struct StoriesView: View {
                 }
                 .updating($dragTranslation) { value, state, transaction in
                     // enable only swipe to bottom when start dragging
-                    guard value.translation.height >= 0 || viewModel.isDragging else { return}
+                    guard value.translation.height >= 0 || viewModel.isDragging else { return }
                     state = value.translation
                 }
                 .onEnded { value in
@@ -62,7 +62,7 @@ struct StoriesView: View {
                     }
                 }
         )
-        .animation(.linear(duration: 0.15))
+        .animation(.linear(duration: 0.15), value: dragTranslation)
         .onChange(of: viewModel.isDismissing) { newValue in
             guard newValue else { return }
             presentation.wrappedValue.dismiss()
@@ -84,7 +84,6 @@ struct StoriesView: View {
                                 }
                             }()
                             let rate: CGFloat = -minX / proxy.size.width
-//
                             let scale = (1 - rate * 0.1).clamp(0.8, 1)
 
                             StoryView(
@@ -92,10 +91,10 @@ struct StoriesView: View {
                                 safeAreaInsets: geo.safeAreaInsets
                             )
                             .id(viewModel.storiesViewModels[index].story.id)
-                            // Corner radius when changing stories
-                            .clipShape(RoundedRectangle(cornerRadius: 12 * (rate)))
                             // Darken when changing stories
                             .overlay(Color.black.opacity(rate * 0.5))
+                            // Corner radius when changing stories
+                            .clipShape(RoundedRectangle(cornerRadius: 12 * (rate)))
                             .clipped()
                             // Transform when changing stories
                             .scaleEffect(scale, anchor: .center)
@@ -110,7 +109,6 @@ struct StoriesView: View {
                         )
                     }
                 }
-                .animation(.none)
                 .background(scrollDetector(geo: geo))
             }
             .pagingEnable()
@@ -136,7 +134,7 @@ struct StoriesView: View {
                 }
             },
             onScroll: { scrollView, offset in
-                guard 
+                guard
                     !viewModel.isDismissing,
                     offset.x <= -10 ||
                     offset.x >= scrollView.contentSize.width - scrollView.frame.width + 10
