@@ -35,7 +35,7 @@ public extension StoryKit.Story {
             let titleColor: Color
             let backgroundColor: Color
             let title: String
-            let link: URL
+            public let link: URL
             let font: Font
             let height: CGFloat
             let cornerRadius: CGFloat
