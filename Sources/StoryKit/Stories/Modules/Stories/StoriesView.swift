@@ -13,6 +13,7 @@ struct StoriesView: View {
     @StateObject var viewModel: StoriesViewModel
     @State private var viewSize: CGSize = .zero
     @GestureState private var dragTranslation: CGSize = .zero
+    @State private var opacity: Double = 0.0
 
     private var scale: CGFloat {
         guard viewSize.height > 0 else { return 1 }
@@ -40,6 +41,7 @@ struct StoriesView: View {
                     viewSize = geo.size
                     viewModel.viewDidAppear()
                 }
+                .opacity(opacity)
         }
         .statusBarHidden(false)
         .gesture(
@@ -118,6 +120,14 @@ struct StoriesView: View {
                 }
             }
             .onAppear {
+                // workaround for the bug with story flickering on opening due to scrolling
+                if #available(iOS 16.4, *) {
+                    opacity = 1.0
+                } else {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        opacity = 1.0
+                    }
+                }
                 // Have to scroll to current page if stories were opened not from first item
                 scrollReader.scrollTo(viewModel.currentStoryIndex)
             }
